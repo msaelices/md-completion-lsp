@@ -12,5 +12,14 @@ def encode_msg(msg: Any) -> str:
     return f'Content-Length: {len(serialized)}\r\n\r\n{serialized}'
 
 def decode_msg(msg: str) -> Any:
-    return json.loads(msg.split('\r\n\r\n', 1)[1])
+    try:
+        header, content = msg.split('\r\n\r\n', 1)
+    except ValueError:
+        raise ValueError('No header found in message')
+    if 'Content-Length' not in header:
+        raise ValueError('Header must contain Content-Length')
+    content_length = int(header.split('Content-Length: ')[1].split('\r\n')[0])
+    if content_length != len(content):
+        raise ValueError('Content-Length does not match actual content length')
+    return json.loads(content)
 
