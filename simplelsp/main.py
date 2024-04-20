@@ -3,7 +3,8 @@
 import logging
 import sys
 
-from jsonrpc import JsonRpcReader, JsonRpcConsumer
+from jsonrpc import JsonRpcReader
+from lsp import LspConsumer
 
 
 logging.basicConfig(
@@ -14,14 +15,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-class LSPConsumer(JsonRpcConsumer):
-
-    def consume(self, msg: dict) -> None:
-        logger.info(f'Consumed: {msg}')
-
-
 def main():
-    reader = JsonRpcReader(consumer=LSPConsumer())
+    reader = JsonRpcReader(consumer=LspConsumer(logger=logger))
     while True:
         data = sys.stdin.buffer.read(10).decode()
         reader.feed(data)
