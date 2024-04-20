@@ -16,7 +16,8 @@ logger = logging.getLogger(__name__)
 
 
 def main():
-    reader = JsonRpcReader(consumer=LspConsumer(logger=logger))
+    consumer = LspConsumer(stream=sys.stdout, logger=logger)
+    reader = JsonRpcReader(consumer=consumer)
     while True:
         data = sys.stdin.buffer.read(10).decode()
         reader.feed(data)

@@ -1,10 +1,10 @@
 from pytest import raises
-from simplelsp.jsonrpc import decode_msg, encode_msg, JsonRpcReader
+from simplelsp.jsonrpc import decode_msg, encode_msg, JsonRpcReader, Message
 
 
 def test_encode_msg():
     expected = 'Content-Length: 24\r\n\r\n{"method": "initialize"}'
-    assert expected == encode_msg({'method': 'initialize'})
+    assert expected == encode_msg(Message(method='initialize'))
 
 
 def test_decode_msg():

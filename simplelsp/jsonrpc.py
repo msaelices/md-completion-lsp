@@ -38,7 +38,7 @@ class JsonRpcReader:
             self.buffer = ''
 
 
-class StreamWriter:
+class JsonRpcWriter:
     pass
 
 
