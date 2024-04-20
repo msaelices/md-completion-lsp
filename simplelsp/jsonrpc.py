@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any
+from typing import Any, Protocol
 
 SEP = '\r\n'
 HEADER_SEP = f'{SEP}{SEP}'
@@ -48,3 +48,26 @@ def decode_msg(msg: str) -> Any:
         raise ValueError(f'{CONTENT_LENGTH} does not match actual content length')
     return json.loads(content)
 
+
+class JsonRpcConsumer(Protocol):
+
+    def consume(self, msg: dict) -> None:
+        ...
+
+
+class JsonRpcReader:
+
+    def __init__(self, consumer: Consumer):
+        self.buffer = ''
+        self.consumer = consumer
+
+    def feed(self, data: str) -> None:
+        self.buffer += data
+        if is_msg(self.buffer):
+            msg = decode_msg(self.buffer)
+            self.consumer.consume(msg)
+            self.buffer = ''
+
+
+class StreamWriter:
+    pass
