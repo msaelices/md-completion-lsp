@@ -8,6 +8,40 @@ HEADER_SEP = f'{SEP}{SEP}'
 CONTENT_LENGTH = 'Content-Length'
 
 
+class Message(dict):
+    """A JSON-RPC message."""
+
+    @property
+    def method(self) -> str:
+        return self['method']
+
+
+class JsonRpcConsumer(Protocol):
+    """A consumer of JSON-RPC messages."""
+
+    def consume(self, msg: Message) -> None:
+        ...
+
+
+class JsonRpcReader:
+    """Reads JSON-RPC messages from a stream and feeds them to a consumer."""
+
+    def __init__(self, consumer: JsonRpcConsumer):
+        self.buffer = ''
+        self.consumer = consumer
+
+    def feed(self, data: str) -> None:
+        self.buffer += data
+        if is_msg(self.buffer):
+            msg = decode_msg(self.buffer)
+            self.consumer.consume(msg)
+            self.buffer = ''
+
+
+class StreamWriter:
+    pass
+
+
 def get_header_key(header: str, key: str) -> str:
     """Return the value of the key in the header."""
     try:
@@ -28,7 +62,7 @@ def is_msg(data: str) -> bool:
     return content_length == len(content)
 
 
-def encode_msg(msg: Any) -> str:
+def encode_msg(msg: Message) -> str:
     try:
         serialized = json.dumps(msg)
     except TypeError:
@@ -36,7 +70,7 @@ def encode_msg(msg: Any) -> str:
     return f'{CONTENT_LENGTH}: {len(serialized)}\r\n\r\n{serialized}'
 
 
-def decode_msg(msg: str) -> Any:
+def decode_msg(msg: str) -> Message:
     try:
         header, content = msg.split(HEADER_SEP, 1)
     except ValueError:
@@ -46,28 +80,6 @@ def decode_msg(msg: str) -> Any:
     content_length = int(get_header_key(header, CONTENT_LENGTH))
     if content_length != len(content):
         raise ValueError(f'{CONTENT_LENGTH} does not match actual content length')
-    return json.loads(content)
 
+    return Message(**json.loads(content))
 
-class JsonRpcConsumer(Protocol):
-
-    def consume(self, msg: dict) -> None:
-        ...
-
-
-class JsonRpcReader:
-
-    def __init__(self, consumer: Consumer):
-        self.buffer = ''
-        self.consumer = consumer
-
-    def feed(self, data: str) -> None:
-        self.buffer += data
-        if is_msg(self.buffer):
-            msg = decode_msg(self.buffer)
-            self.consumer.consume(msg)
-            self.buffer = ''
-
-
-class StreamWriter:
-    pass

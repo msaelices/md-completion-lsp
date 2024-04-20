@@ -3,13 +3,15 @@ from simplelsp.jsonrpc import decode_msg, encode_msg, JsonRpcReader
 
 
 def test_encode_msg():
-    expected = 'Content-Length: 17\r\n\r\n{"testing": true}'
-    assert expected == encode_msg({'testing': True})
+    expected = 'Content-Length: 24\r\n\r\n{"method": "initialize"}'
+    assert expected == encode_msg({'method': 'initialize'})
 
 
 def test_decode_msg():
-    expected = {'testing': True}
-    assert expected == decode_msg('Content-Length: 17\r\n\r\n{"testing": true}')
+    expected = {'method': 'initialize'}
+    decoded = decode_msg('Content-Length: 24\r\n\r\n{"method": "initialize"}')
+    assert expected == decoded
+    assert decoded.method == 'initialize'
     with raises(
         ValueError, match='No header found in message',
     ):
