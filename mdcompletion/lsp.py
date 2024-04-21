@@ -23,6 +23,9 @@ class LspConsumer(JsonRpcConsumer):
                 response_msg = self.handle_initialize(msg)
             case 'initialized':
                 self.logger.info('Initialized')
+            case 'textDocument/completion':
+                self.logger.info('Completion')
+                response_msg = self.handle_completion(msg)
             case 'shutdown':
                 self.logger.info('Shutting down')
             case _:
@@ -47,6 +50,19 @@ class LspConsumer(JsonRpcConsumer):
             },
         })
 
+    def handle_completion(self, msg: Message) -> Message:
+        # TODO: Implement completion logic
+        return Message(
+            isIncomplete=False,
+            items=[
+                {
+                    'label': 'PR #1 link',
+                    'kind': 18,
+                    'insertText': '(http://github.com/msaelices/md-complation-lsp/pull/1)',
+                },
+            ],
+        )
+
     def _get_capabilities(self):
         return {
             'codeActionProvider': False, # Actions to a fragment of code to refactor, fix or beautify it
@@ -54,8 +70,8 @@ class LspConsumer(JsonRpcConsumer):
                 'resolveProvider': False,  # Like show git blame line or similar 
             },
             'completionProvider': {
-                'resolveProvider': False,
-                'triggerCharacters': ['.'],
+                'resolveProvider': True,
+                'triggerCharacters': [']'],
             },
             'documentFormattingProvider': False,
             'documentHighlightProvider': False,
