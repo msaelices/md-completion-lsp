@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Protocol
+from typing import Protocol
 
 SEP = '\r\n'
 HEADER_SEP = f'{SEP}{SEP}'
@@ -12,8 +12,12 @@ class Message(dict):
     """A JSON-RPC message."""
 
     @property
-    def method(self) -> str:
-        return self['method']
+    def id(self) -> int:
+        return self['id']
+
+    @property
+    def method(self) -> str | None:
+        return self.get('method', None)
 
 
 class JsonRpcConsumer(Protocol):
@@ -67,7 +71,7 @@ def encode_msg(msg: Message) -> str:
         serialized = json.dumps(msg)
     except TypeError:
         raise ValueError('Message must be JSON serializable')
-    return f'{CONTENT_LENGTH}: {len(serialized)}\r\n\r\n{serialized}'
+    return f'{CONTENT_LENGTH}: {len(serialized)}{HEADER_SEP}{serialized}'
 
 
 def decode_msg(msg: str) -> Message:

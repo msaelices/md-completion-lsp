@@ -39,29 +39,32 @@ def test_initialize():
     consumer.consume(msg)
     assert stream.messages == [
         Message({
-            'capabilities': {
-                'codeActionProvider': False,
-                'codeLensProvider': {'resolveProvider': False},
-                'completionProvider': {
-                     'resolveProvider': False,
-                     'triggerCharacters': ['.'],
+            'id': 1,
+            'jsonrpc': '2.0',
+            'result': {
+                'capabilities': {
+                    'codeActionProvider': False,
+                    'codeLensProvider': {'resolveProvider': False},
+                    'completionProvider': {
+                         'resolveProvider': False,
+                         'triggerCharacters': ['.'],
+                    },
+                    'definitionProvider': False,
+                    'documentFormattingProvider': False,
+                    'documentHighlightProvider': False,
+                    'documentRangeFormattingProvider': False,
+                    'documentSymbolProvider': False,
+                    'executeCommandProvider': {'commands': []},
+                    'foldingRangeProvider': False,
+                    'hoverProvider': False,
+                    'referencesProvider': False,
+                    'renameProvider': False,
+                    'signatureHelpProvider': {'triggerCharacters': ['(', ',', '=']},
+                    'textDocumentSync': {'change': 2, 'openClose': False},
+                    'workspace': {'workspaceFolders': {'changeNotifications': False, 'supported': False}},
                 },
-                'definitionProvider': False,
-                'documentFormattingProvider': False,
-                'documentHighlightProvider': False,
-                'documentRangeFormattingProvider': False,
-                'documentSymbolProvider': False,
-                'executeCommandProvider': {'commands': []},
-                'foldingRangeProvider': False,
-                'hoverProvider': False,
-                'referencesProvider': False,
-                'renameProvider': False,
-                'signatureHelpProvider': {'triggerCharacters': ['(', ',', '=']},
-                'textDocumentSync': {'change': 2, 'openClose': False},
-                'workspace': {'workspaceFolders': {'changeNotifications': False, 'supported': False}},
+                'serverInfo': {'name': 'simplelsp'},
             },
-            'method': 'initialize',
-            'serverInfo': {'name': 'simplelsp'},
         })
     ]
 
