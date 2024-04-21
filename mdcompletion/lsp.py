@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from io import TextIOBase
 
+from .doc import Document
 from .jsonrpc import JsonRpcConsumer, Message, encode_msg
 
 if TYPE_CHECKING:
@@ -13,6 +14,7 @@ class LspConsumer(JsonRpcConsumer):
     def __init__(self, stream: TextIOBase, logger: Logger) -> None:
         self.logger = logger
         self.stream = stream
+        self.documents = {}
 
     def consume(self, msg: Message) -> None:
         self.logger.info(f'Consumed: {msg}')
@@ -23,6 +25,9 @@ class LspConsumer(JsonRpcConsumer):
                 response_msg = self.handle_initialize(msg)
             case 'initialized':
                 self.logger.info('Initialized')
+            case 'textDocument/didOpen':
+                self.logger.info('Document opened')
+                response_msg = self.handle_did_open(msg)
             case 'textDocument/completion':
                 self.logger.info('Completion')
                 response_msg = self.handle_completion(msg)
@@ -49,6 +54,13 @@ class LspConsumer(JsonRpcConsumer):
                 'name': 'mdcompletion',
             },
         })
+
+    def handle_did_open(self, msg: Message) -> Message:
+        doc_data = msg.params['textDocument']
+        self.documents[doc_data['uri']] = Document(
+            uri=doc_data['uri'],
+            text=doc_data['text'],
+        )
 
     def handle_completion(self, msg: Message) -> Message:
         # TODO: Implement completion logic
@@ -88,7 +100,7 @@ class LspConsumer(JsonRpcConsumer):
             'signatureHelpProvider': {'triggerCharacters': ['(', ',', '=']},
             'textDocumentSync': {  # Defines how text documents are synced
                 'change': 2, # 1 -> Full, 2 -> Incremental
-                'openClose': False,
+                'openClose': True,
             },
             'workspace': {
                 'workspaceFolders': {'supported': False, 'changeNotifications': False}

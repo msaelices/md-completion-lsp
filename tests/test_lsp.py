@@ -1,5 +1,6 @@
 import logging
 from io import TextIOBase
+from mdcompletion.doc import Document
 from mdcompletion.jsonrpc import Message, decode_msg
 from mdcompletion.lsp import LspConsumer
 
@@ -46,8 +47,8 @@ def test_initialize():
                     'codeActionProvider': False,
                     'codeLensProvider': {'resolveProvider': False},
                     'completionProvider': {
-                         'resolveProvider': False,
-                         'triggerCharacters': ['.'],
+                         'resolveProvider': True,
+                         'triggerCharacters': [']'],
                     },
                     'definitionProvider': False,
                     'documentFormattingProvider': False,
@@ -60,7 +61,7 @@ def test_initialize():
                     'referencesProvider': False,
                     'renameProvider': False,
                     'signatureHelpProvider': {'triggerCharacters': ['(', ',', '=']},
-                    'textDocumentSync': {'change': 2, 'openClose': False},
+                    'textDocumentSync': {'change': 2, 'openClose': True},
                     'workspace': {'workspaceFolders': {'changeNotifications': False, 'supported': False}},
                 },
                 'serverInfo': {'name': 'mdcompletion'},
@@ -68,3 +69,28 @@ def test_initialize():
         })
     ]
 
+
+def test_did_open():
+    stream = FakeStream()
+    logger = logging.getLogger('dummy')
+    logger.addHandler(logging.NullHandler())
+    msg = Message({
+        'method': 'textDocument/didOpen',
+        'params': {
+            'textDocument': {
+                'uri': 'file:///tmp/test.md',
+                'languageId': 'markdown',
+                'version': 1,
+                'text': 'Hello world!',
+            },
+        },
+        'jsonrpc': '2.0',
+    })
+    consumer = LspConsumer(stream=stream, logger=logger)
+    consumer.consume(msg)
+    assert consumer.documents == {
+        'file:///tmp/test.md': Document(
+            uri='file:///tmp/test.md',
+            text='Hello world!',
+        ),
+    } 
