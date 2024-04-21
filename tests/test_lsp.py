@@ -1,7 +1,7 @@
 import logging
 from io import TextIOBase
-from simplelsp.jsonrpc import Message, decode_msg
-from simplelsp.lsp import LspConsumer
+from mdcompletion.jsonrpc import Message, decode_msg
+from mdcompletion.lsp import LspConsumer
 
 
 class FakeStream(TextIOBase):
@@ -63,7 +63,7 @@ def test_initialize():
                     'textDocumentSync': {'change': 2, 'openClose': False},
                     'workspace': {'workspaceFolders': {'changeNotifications': False, 'supported': False}},
                 },
-                'serverInfo': {'name': 'simplelsp'},
+                'serverInfo': {'name': 'mdcompletion'},
             },
         })
     ]

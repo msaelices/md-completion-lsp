@@ -1,1 +1,1 @@
-# Simple Python LSP server
+# Markdown Auto-completion LSP server

@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "simplelsp"
+name = "mdcompletion"
 version = "0.1.0"
 description = "Simple Python Language Server Protocol implementation for educational purposes"
 authors = ["Manuel Saelices <msaelices@gmail.com>"]

@@ -21,6 +21,8 @@ class LspConsumer(JsonRpcConsumer):
             case 'initialize':
                 self.logger.info('Initializing')
                 response_msg = self.handle_initialize(msg)
+            case 'initialized':
+                self.logger.info('Initialized')
             case 'shutdown':
                 self.logger.info('Shutting down')
             case _:
@@ -41,7 +43,7 @@ class LspConsumer(JsonRpcConsumer):
         return Message({
             'capabilities': self._get_capabilities(),
             'serverInfo': {
-                'name': 'simplelsp',
+                'name': 'mdcompletion',
             },
         })
 
@@ -69,7 +71,7 @@ class LspConsumer(JsonRpcConsumer):
             'foldingRangeProvider': False,
             'signatureHelpProvider': {'triggerCharacters': ['(', ',', '=']},
             'textDocumentSync': {  # Defines how text documents are synced
-                'change': 2, # 2 -> Incremental
+                'change': 2, # 1 -> Full, 2 -> Incremental
                 'openClose': False,
             },
             'workspace': {

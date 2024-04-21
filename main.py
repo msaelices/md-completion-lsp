@@ -5,9 +5,8 @@ from __future__ import annotations
 import logging
 import sys
 
-from simplelsp.jsonrpc import JsonRpcReader
-from simplelsp.lsp import LspConsumer
-
+from mdcompletion.jsonrpc import JsonRpcReader
+from mdcompletion.lsp import LspConsumer
 
 logging.basicConfig(
     filename='output.log',

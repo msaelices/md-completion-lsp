@@ -19,6 +19,10 @@ class Message(dict):
     def method(self) -> str | None:
         return self.get('method', None)
 
+    @property
+    def params(self) -> dict:
+        return self['params']
+
 
 class JsonRpcConsumer(Protocol):
     """A consumer of JSON-RPC messages."""

@@ -1,5 +1,5 @@
 from pytest import raises
-from simplelsp.jsonrpc import decode_msg, encode_msg, JsonRpcReader, Message
+from mdcompletion.jsonrpc import decode_msg, encode_msg, JsonRpcReader, Message
 
 
 def test_encode_msg():
