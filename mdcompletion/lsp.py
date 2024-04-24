@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 
 class LspConsumer(JsonRpcConsumer):
-    def __init__(self, stream: TextIOBase, logger: Logger, github_url: str) -> None:
+    def __init__(self, stream: TextIOBase, logger: Logger, github_url: str = '') -> None:
         self.logger = logger
         self.stream = stream
         self.github_url = github_url

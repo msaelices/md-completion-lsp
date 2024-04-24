@@ -1,16 +1,16 @@
 import logging
-from io import TextIOBase
+from io import IOBase
 from mdcompletion.doc import Document
 from mdcompletion.jsonrpc import Message, decode_msg
 from mdcompletion.lsp import LspConsumer
 
 
-class FakeStream(TextIOBase):
+class FakeStream(IOBase):
     def __init__(self) -> None:
         self.messages = []
 
     def write(self, s: str) -> int:
-        self.messages.append(decode_msg(s))
+        self.messages.append(decode_msg(s.encode()))
         return len(s)
 
 
@@ -61,7 +61,7 @@ def test_initialize():
                     'referencesProvider': False,
                     'renameProvider': False,
                     'signatureHelpProvider': {'triggerCharacters': ['(', ',', '=']},
-                    'textDocumentSync': {'change': 2, 'openClose': True},
+                    'textDocumentSync': {'change': 1, 'openClose': True},
                     'workspace': {'workspaceFolders': {'changeNotifications': False, 'supported': False}},
                 },
                 'serverInfo': {'name': 'mdcompletion'},

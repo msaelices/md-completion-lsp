@@ -87,7 +87,7 @@ def decode_msg(msg: bytes) -> Message:
         raise ValueError(f'Header must contain {CONTENT_LENGTH.decode()}')
     content_length = int(get_header_key(header, CONTENT_LENGTH))
     if content_length != len(content):
-        raise ValueError(f'{CONTENT_LENGTH} does not match actual content length')
+        raise ValueError(f'{CONTENT_LENGTH.decode()} does not match actual content length')
 
     return Message(**json.loads(content.decode()))
 

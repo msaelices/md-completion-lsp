@@ -9,21 +9,21 @@ def test_encode_msg():
 
 def test_decode_msg():
     expected = {'method': 'initialize'}
-    decoded = decode_msg('Content-Length: 24\r\n\r\n{"method": "initialize"}')
+    decoded = decode_msg(b'Content-Length: 24\r\n\r\n{"method": "initialize"}')
     assert expected == decoded
     assert decoded.method == 'initialize'
     with raises(
         ValueError, match='No header found in message',
     ):
-        decode_msg('{"testing": true}')
+        decode_msg(b'{"testing": true}')
     with raises(
         ValueError, match='Header must contain Content-Length',
     ):
-        decode_msg('Content-Type: json-rpc\r\n\r\n{"testing": true}')
+        decode_msg(b'Content-Type: json-rpc\r\n\r\n{"testing": true}')
     with raises(
         ValueError, match='Content-Length does not match actual content length'
     ):
-        decode_msg('Content-Length: 17\r\n\r\n{"testing": false}')
+        decode_msg(b'Content-Length: 17\r\n\r\n{"testing": false}')
 
 
 def test_jsonrpc_reader():
@@ -32,5 +32,5 @@ def test_jsonrpc_reader():
         def consume(self, msg):
             messages.append(msg)
     reader = JsonRpcReader(consumer=Consumer())
-    reader.feed('Content-Length: 17\r\n\r\n{"testing": true}')
+    reader.feed(b'Content-Length: 17\r\n\r\n{"testing": true}')
     assert messages == [{'testing': True}]
