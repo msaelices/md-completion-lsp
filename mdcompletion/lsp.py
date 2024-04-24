@@ -11,10 +11,11 @@ if TYPE_CHECKING:
 
 
 class LspConsumer(JsonRpcConsumer):
-    def __init__(self, stream: TextIOBase, logger: Logger) -> None:
+    def __init__(self, stream: TextIOBase, logger: Logger, github_url: str) -> None:
         self.logger = logger
         self.stream = stream
-        self.documents = {}
+        self.github_url = github_url
+        self.documents: dict[str, Document] = {}
 
     def consume(self, msg: Message) -> None:
         self.logger.info(f'Consumed: {msg}')
@@ -28,6 +29,9 @@ class LspConsumer(JsonRpcConsumer):
             case 'textDocument/didOpen':
                 self.logger.info('Document opened')
                 response_msg = self.handle_did_open(msg)
+            case 'textDocument/didChange':
+                self.logger.info('Document changed')
+                response_msg = self.handle_did_change(msg)
             case 'textDocument/completion':
                 self.logger.info('Completion')
                 response_msg = self.handle_completion(msg)
@@ -46,7 +50,6 @@ class LspConsumer(JsonRpcConsumer):
         self.stream.flush()
         self.logger.info(f'Wrote: {encoded}')
 
-
     def handle_initialize(self, msg: Message) -> Message:
         return Message({
             'capabilities': self._get_capabilities(),
@@ -62,15 +65,38 @@ class LspConsumer(JsonRpcConsumer):
             text=doc_data['text'],
         )
 
+    def handle_did_change(self, msg: Message) -> Message:
+        doc_data = msg.params['textDocument']
+        content_changes = msg.params['contentChanges']
+        self.documents[doc_data['uri']].text = content_changes[0]['text']
+
     def handle_completion(self, msg: Message) -> Message:
-        # TODO: Implement completion logic
+        doc_data = msg.params['textDocument']
+        position = msg.params['position']
+        end_col = position['character']
+        doc_line = self._get_doc_text_at(doc_data['uri'], position['line'], 0, end_col)
+        start_col = max(0, doc_line.find('['))
+        link_title = doc_line[start_col + 1:end_col - 1]
+        prefix = link_title[:2].upper()
+        match prefix:
+            case 'PR':
+                pr_number = link_title[2:]
+                label = f'PR #{pr_number} link'
+                text_to_insert = f'({self.github_url}/pull/{pr_number})'
+            case _:
+                label = ''
+                text_to_insert = ''
+
+        if not text_to_insert:
+            return Message(isIncomplete=False, items=[])
+
         return Message(
             isIncomplete=False,
             items=[
                 {
-                    'label': 'PR #1 link',
+                    'label': label,
                     'kind': 18,
-                    'insertText': '(http://github.com/msaelices/md-complation-lsp/pull/1)',
+                    'insertText': text_to_insert,
                 },
             ],
         )
@@ -99,10 +125,14 @@ class LspConsumer(JsonRpcConsumer):
             'foldingRangeProvider': False,
             'signatureHelpProvider': {'triggerCharacters': ['(', ',', '=']},
             'textDocumentSync': {  # Defines how text documents are synced
-                'change': 2, # 1 -> Full, 2 -> Incremental
+                'change': 1, # 1 -> Full, 2 -> Incremental
                 'openClose': True,
             },
             'workspace': {
                 'workspaceFolders': {'supported': False, 'changeNotifications': False}
             },
         }
+
+    def _get_doc_text_at(self, uri: str, line: int, start_col: int, end_col: int) -> str:
+        doc = self.documents[uri]
+        return doc.text_at(line, start_col, end_col)
