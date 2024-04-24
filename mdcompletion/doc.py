@@ -9,7 +9,7 @@ class Document:
     def __str__(self) -> str:
         return f'{self.uri}: {self.text[:50]}'
 
-    @property 
+    @property
     def lines(self) -> list[str]:
         return self.text.splitlines()
 

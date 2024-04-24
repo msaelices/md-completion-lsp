@@ -90,4 +90,3 @@ def decode_msg(msg: bytes) -> Message:
         raise ValueError(f'{CONTENT_LENGTH.decode()} does not match actual content length')
 
     return Message(**json.loads(content.decode()))
-

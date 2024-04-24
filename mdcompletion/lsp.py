@@ -51,12 +51,14 @@ class LspConsumer(JsonRpcConsumer):
         self.logger.info(f'Wrote: {encoded}')
 
     def handle_initialize(self, msg: Message) -> Message:
-        return Message({
-            'capabilities': self._get_capabilities(),
-            'serverInfo': {
-                'name': 'mdcompletion',
-            },
-        })
+        return Message(
+            {
+                'capabilities': self._get_capabilities(),
+                'serverInfo': {
+                    'name': 'mdcompletion',
+                },
+            }
+        )
 
     def handle_did_open(self, msg: Message) -> Message:
         doc_data = msg.params['textDocument']
@@ -78,7 +80,7 @@ class LspConsumer(JsonRpcConsumer):
         start_col = max(0, doc_line.rfind('['))
 
         self.logger.debug(f'Line to complete: {doc_line}. Start col: {start_col}, end col: {end_col}')
-        link_title = doc_line[start_col + 1:end_col - 1]
+        link_title = doc_line[start_col + 1 : end_col - 1]
         prefix = link_title[:2].upper()
 
         match prefix:
@@ -106,9 +108,9 @@ class LspConsumer(JsonRpcConsumer):
 
     def _get_capabilities(self):
         return {
-            'codeActionProvider': False, # Actions to a fragment of code to refactor, fix or beautify it
+            'codeActionProvider': False,  # Actions to a fragment of code to refactor, fix or beautify it
             'codeLensProvider': {
-                'resolveProvider': False,  # Like show git blame line or similar 
+                'resolveProvider': False,  # Like show git blame line or similar
             },
             'completionProvider': {
                 'resolveProvider': True,
@@ -128,12 +130,10 @@ class LspConsumer(JsonRpcConsumer):
             'foldingRangeProvider': False,
             'signatureHelpProvider': {'triggerCharacters': ['(', ',', '=']},
             'textDocumentSync': {  # Defines how text documents are synced
-                'change': 1, # 1 -> Full, 2 -> Incremental
+                'change': 1,  # 1 -> Full, 2 -> Incremental
                 'openClose': True,
             },
-            'workspace': {
-                'workspaceFolders': {'supported': False, 'changeNotifications': False}
-            },
+            'workspace': {'workspaceFolders': {'supported': False, 'changeNotifications': False}},
         }
 
     def _get_doc_text_at(self, uri: str, line: int, start_col: int, end_col: int) -> str:
