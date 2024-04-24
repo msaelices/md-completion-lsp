@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 def main():
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument('--log-file', help='Log file path', default='mdcompletion.log')
+    arg_parser.add_argument('--log-file', help='Log file path', default='/tmp/mdcompletion.log')
     arg_parser.add_argument('--log-level', help='Log level', default='DEBUG', choices=('DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'))
     arg_parser.add_argument('--github-url', help='GitHub URL', default='')
     args = arg_parser.parse_args()
@@ -26,7 +26,7 @@ def main():
     consumer = LspConsumer(stream=sys.stdout, logger=logger, github_url=args.github_url)
     reader = JsonRpcReader(consumer=consumer)
     while True:
-        data = sys.stdin.buffer.read(1).decode()
+        data = sys.stdin.buffer.read(1)
         reader.feed(data)
 
 
