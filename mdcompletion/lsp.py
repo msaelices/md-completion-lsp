@@ -75,9 +75,12 @@ class LspConsumer(JsonRpcConsumer):
         position = msg.params['position']
         end_col = position['character']
         doc_line = self._get_doc_text_at(doc_data['uri'], position['line'], 0, end_col)
-        start_col = max(0, doc_line.find('['))
+        start_col = max(0, doc_line.rfind('['))
+
+        self.logger.debug(f'Line to complete: {doc_line}. Start col: {start_col}, end col: {end_col}')
         link_title = doc_line[start_col + 1:end_col - 1]
         prefix = link_title[:2].upper()
+
         match prefix:
             case 'PR':
                 pr_number = link_title[2:]
