@@ -99,3 +99,43 @@ def test_did_open():
             text='Hello world!',
         ),
     }
+
+
+def test_did_change():
+    stream = FakeStream()
+    logger = logging.getLogger('dummy')
+    logger.addHandler(logging.NullHandler())
+    msg = Message(
+        {
+            'method': 'textDocument/didChange',
+            'params': {
+                'textDocument': {
+                    'uri': 'file:///tmp/test.md',
+                    'version': 2,
+                },
+                'contentChanges': [
+                    {
+                        'range': {'start': {'line': 0, 'character': 0}, 'end': {'line': 0, 'character': 0}},
+                        'rangeLength': 0,
+                        'text': 'Bye world!',
+                    },
+                ],
+            },
+            'jsonrpc': '2.0',
+        }
+    )
+    consumer = LspConsumer(stream=stream, logger=logger)
+    consumer.documents = {
+        'file:///tmp/test.md': Document(
+            uri='file:///tmp/test.md',
+            text='Hello world!',
+        ),
+    }
+    consumer.consume(msg)
+    assert consumer.documents == {
+        'file:///tmp/test.md': Document(
+            uri='file:///tmp/test.md',
+            text='Bye world!',
+        ),
+    }
+    assert stream.messages == []
