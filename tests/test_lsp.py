@@ -89,6 +89,7 @@ def test_did_open():
                 },
             },
             'jsonrpc': '2.0',
+            'id': 1,
         }
     )
     consumer = LspConsumer(stream=stream, logger=logger)
@@ -122,6 +123,7 @@ def test_did_change():
                 ],
             },
             'jsonrpc': '2.0',
+            'id': 1,
         }
     )
     consumer = LspConsumer(stream=stream, logger=logger)
@@ -139,3 +141,52 @@ def test_did_change():
         ),
     }
     assert stream.messages == []
+
+
+def test_completion():
+    stream = FakeStream()
+    logger = logging.getLogger('dummy')
+    logger.addHandler(logging.NullHandler())
+    msg = Message(
+        {
+            'method': 'textDocument/completion',
+            'params': {
+                'context': {'triggerCharacter': ']', 'triggerKind': 2},
+                'position': {
+                    'line': 0,
+                    'character': 13,
+                },
+                'textDocument': {
+                    'uri': 'file:///tmp/test.md',
+                },
+            },
+            'jsonrpc': '2.0',
+            'id': 1,
+        }
+    )
+    consumer = LspConsumer(stream=stream, logger=logger, github_url='https://github.com/foo/bar')
+    consumer.documents = {
+        'file:///tmp/test.md': Document(
+            uri='file:///tmp/test.md',
+            text='Link to [PR1]',
+        ),
+    }
+    consumer.consume(msg)
+    assert stream.messages == [
+        Message(
+            {
+                'jsonrpc': '2.0',
+                'id': 1,
+                'result': {
+                    'isIncomplete': False,
+                    'items': [
+                        {
+                            'label': 'PR #1 link',
+                            'kind': 18,
+                            'insertText': '(https://github.com/foo/bar/pull/1)',
+                        },
+                    ],
+                },
+            }
+        )
+    ]
